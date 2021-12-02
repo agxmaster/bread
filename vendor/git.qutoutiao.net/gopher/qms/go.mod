@@ -1,0 +1,68 @@
+module git.qutoutiao.net/gopher/qms
+
+go 1.13
+
+require (
+	git.qutoutiao.net/golib/gorm v1.0.8
+	git.qutoutiao.net/golib/redis v1.0.7
+	git.qutoutiao.net/golib/resty v1.0.4
+	git.qutoutiao.net/gopher/nsqsdk v1.0.3
+	git.qutoutiao.net/gopher/pedestal v1.13.9
+	git.qutoutiao.net/gopher/qudiscovery v1.5.25
+	git.qutoutiao.net/gopher/qutracing v1.1.0
+	git.qutoutiao.net/gopher/rebalancer v1.0.21
+	git.qutoutiao.net/pedestal/discovery v1.15.5
+	github.com/AlecAivazis/survey/v2 v2.2.2
+	github.com/KyleBanks/depth v1.2.1
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/aws/aws-sdk-go v1.35.26
+	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/dolab/colorize v0.0.0-20180106055552-10753a0b4d68
+	github.com/dolab/httptesting v1.3.0
+	github.com/dolab/logger v0.0.0-20181130034249-dcb994406102
+	github.com/ghodss/yaml v1.0.0
+	github.com/gin-gonic/gin v1.6.3
+	github.com/go-openapi/jsonreference v0.19.4
+	github.com/go-openapi/spec v0.19.12
+	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
+	github.com/golang/protobuf v1.4.3
+	github.com/golib/assert v1.4.0
+	github.com/golib/cli v1.3.1
+	github.com/golib/weighted v1.1.0
+	github.com/golib/zerolog v1.20.0
+	github.com/google/uuid v1.1.2
+	github.com/gorilla/websocket v1.4.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2
+	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/hashicorp/consul/api v1.7.0
+	github.com/hashicorp/golang-lru v0.5.4
+	github.com/json-iterator/go v1.1.10
+	github.com/juju/errors v0.0.0-20200330140219-3fe23663418f
+	github.com/juju/testing v0.0.0-20201030020617-7189b3728523 // indirect
+	github.com/mitchellh/mapstructure v1.3.3
+	github.com/nsqio/go-nsq v1.0.8
+	github.com/opentracing/opentracing-go v1.2.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/pelletier/go-toml v1.8.1
+	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.8.0
+	github.com/prometheus/common v0.15.0
+	github.com/sirupsen/logrus v1.7.0
+	github.com/smartystreets/goconvey v1.6.4
+	github.com/spf13/afero v1.4.1
+	github.com/spf13/cast v1.3.1
+	github.com/spf13/jwalterweatherman v1.1.0
+	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.6.1
+	github.com/swaggo/gin-swagger v1.3.0
+	github.com/swaggo/swag v1.6.9
+	github.com/uber/jaeger-client-go v2.25.0+incompatible
+	go.uber.org/automaxprocs v1.3.0
+	go.uber.org/ratelimit v0.1.0
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+	golang.org/x/tools v0.0.0-20201111224557-41a3a589386c
+	google.golang.org/grpc v1.33.2
+	google.golang.org/protobuf v1.25.0
+	gopkg.in/yaml.v2 v2.3.0
+)

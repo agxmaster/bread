@@ -1,0 +1,37 @@
+
+---
+qms:
+  isolation:
+    Consumer:
+      timeoutInMilliseconds: 10
+      maxConcurrentRequests: 100
+      Server:
+        timeoutInMilliseconds: 1
+        maxConcurrentRequests: 10
+  circuitBreaker:
+    Consumer:
+      enabled: true
+      forceOpen: false
+      forceClosed: false
+      sleepWindowInMilliseconds: 10000
+      requestVolumeThreshold: 30
+      errorThresholdPercentage: 30
+      Server:
+        enabled: true
+        forceOpen: false
+        forceClosed: false
+        sleepWindowInMilliseconds: 1000
+        requestVolumeThreshold: 3
+        errorThresholdPercentage: 3
+  #容错处理函数，目前暂时按照开源的方式来不进行区分处理，统一调用fallback函数
+  fallback:
+    Consumer:
+      enabled: true
+      force: true
+      Server:
+        force: false
+  fallbackpolicy:
+    Consumer:
+      policy: throwexception
+      Server:
+        policy: nil

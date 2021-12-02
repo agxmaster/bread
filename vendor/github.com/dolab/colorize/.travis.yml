@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - 1.8
+  - 1.9
+
+before_script:
+
+install:
+  - go get -v github.com/golib/assert
+
+script:
+  - go test -cover

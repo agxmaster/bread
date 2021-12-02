@@ -1,0 +1,118 @@
+image: registry.qtt6.cn/ee/go:1.14.2-2
+
+
+services:
+  - name: redis:5.0.3-alpine3.9
+
+
+variables:
+  PEDESTAL_CI: "no"
+
+
+stages:
+  - testing
+  - converage
+
+
+gocoverage:
+  stage: converage
+  tags:
+    - k8s-qa
+
+  before_script:
+    ##
+    ## Install ssh-agent if not already installed, it is required by Docker.
+    ## (change apt-get to yum if you use an RPM-based image)
+    ##
+    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    ##
+    ## Create the SSH directory and give it the right permissions.
+    ## Create id_rsa with the SSH key stored in SSH_PRIVATE_KEY variable.
+    ##
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    ##
+    ## ensure known_hosts
+    ##
+    - ssh-keyscan github.com > ~/.ssh/known_hosts
+    - ssh-keyscan git.qutoutiao.net >> ~/.ssh/known_hosts
+
+    ##
+    ## Optionally, if you will be using any Git commands, set the user name and
+    ## and email.
+    ##
+    - git config --global user.name "Git"
+    - git config --global user.email "git@qutoutiao.net"
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
+    - git config --global url."git@git.qutoutiao.net:".insteadOf "https://git.qutoutiao.net/"
+
+    ##
+    ## git submodule
+    ##
+    - git submodule update --init --recursive
+
+    ##
+    ## go dependencies
+    ##
+    - go env -w GOPROXY=https://goproxy.cn,direct
+    - go env -w GOSUMDB=off
+    - go mod tidy -v
+
+  script:
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qutracing
+
+gotesting:
+  stage: testing
+  tags:
+    - k8s-qa
+
+  before_script:
+    ##
+    ## Install ssh-agent if not already installed, it is required by Docker.
+    ## (change apt-get to yum if you use an RPM-based image)
+    ##
+    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    ##
+    ## Create the SSH directory and give it the right permissions.
+    ## Create id_rsa with the SSH key stored in SSH_PRIVATE_KEY variable.
+    ##
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    ##
+    ## ensure known_hosts
+    ##
+    - ssh-keyscan github.com > ~/.ssh/known_hosts
+    - ssh-keyscan git.qutoutiao.net >> ~/.ssh/known_hosts
+
+    ##
+    ## Optionally, if you will be using any Git commands, set the user name and
+    ## and email.
+    ##
+    - git config --global user.name "Git"
+    - git config --global user.email "git@qutoutiao.net"
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
+    - git config --global url."git@git.qutoutiao.net:".insteadOf "https://git.qutoutiao.net/"
+
+    ##
+    ## git submodule
+    ##
+    - git submodule update --init --recursive
+
+    ##
+    ## go dependencies
+    ##
+    - go env -w GOPROXY=https://goproxy.cn,direct
+    - go env -w GOSUMDB=off
+    - go mod tidy -v
+
+  script:
+    - go test -v -timeout 5m git.qutoutiao.net/gopher/qutracing
+    #- go test -v -race -timeout 5m git.qutoutiao.net/gopher/qutracing
+    - go test -v -bench . -run none -timeout 5m git.qutoutiao.net/gopher/qutracing
+
+  after_script:
+    - go env

@@ -1,0 +1,87 @@
+image: registry.qtt6.cn/ee/go:1.14.2-2
+
+include: "http://cicd.qutoutiao.net/gitlab-ci/base/.gitlab-ci.yml"
+
+services:
+  - mysql:8.0
+  - mongo:4.1
+  - consul:1.7.2
+  - redis:5.0.7-alpine3.10
+
+variables:
+  #PEDESTAL_CI: "yes"
+  # Configure mysql service (https://hub.docker.com/_/mysql/)
+  MYSQL_USER: root
+  MYSQL_DATABASE: gitlab_testing_qms
+  MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+stages:
+  - init
+  - testing
+
+
+goinstall:
+  stage: init
+
+  tags:
+    - k8s-qa
+
+  script:
+    ##
+    ## dependencies
+    ##
+    - go env
+
+
+gotesting:
+  stage: testing
+
+  tags:
+    - k8s-qa
+
+  before_script:
+    ##
+    ## Install ssh-agent if not already installed, it is required by Docker.
+    ## (change apt-get to yum if you use an RPM-based image)
+    ##
+    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    ##
+    ## Create the SSH directory and give it the right permissions.
+    ## Create id_rsa with the SSH key stored in SSH_PRIVATE_KEY variable.
+    ##
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    ##
+    ## ensure known_hosts
+    ##
+    - ssh-keyscan github.com > ~/.ssh/known_hosts
+    - ssh-keyscan git.qutoutiao.net >> ~/.ssh/known_hosts
+
+    ##
+    ## Optionally, if you will be using any Git commands, set the user name and
+    ## and email.
+    ##
+    - git config --global user.name "Git"
+    - git config --global user.email "git@qutoutiao.net"
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
+    - git config --global url."git@git.qutoutiao.net:".insteadOf "https://git.qutoutiao.net/"
+
+    ##
+    ## export GOPATH
+    ##
+    - mkdir -p $GOPATH/src/git.qutoutiao.net/gopher
+    - ln -s $(pwd) $GOPATH/src/git.qutoutiao.net/gopher/qms
+
+    ##
+    ## dependencies
+    ## replace go.mod with vendor for ci
+    ##
+    - git submodule update --init --recursive
+    - go mod tidy -v
+
+  script:
+    - go test -v -timeout 10s -race git.qutoutiao.net/gopher/qms/internal/pkg/metrics
+    - go test -v -timeout 10s -cover git.qutoutiao.net/gopher/qms/internal/pkg/metrics
+

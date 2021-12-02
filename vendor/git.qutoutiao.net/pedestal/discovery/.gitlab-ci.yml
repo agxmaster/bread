@@ -1,0 +1,25 @@
+image: registry.qtt6.cn/paas-dev/golang:v1.14.2-buster-slim
+
+services:
+  - consul:1.8.0
+  
+# 配置GOPATH
+before_script:
+  - mkdir -p $(dirname "$GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH")
+  - ln -svf $CI_PROJECT_DIR $(dirname "$GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH")
+  - cd $GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH
+  - go mod tidy -v
+
+stages:
+    - test
+
+build:
+  stage: test
+
+  tags:
+    - k8s-qa
+
+  script:    
+    - go test -v -timeout 10m ./...
+    - go test -v -timeout 10m -race ./...
+    - go test -v -timeout 10m -cover ./...

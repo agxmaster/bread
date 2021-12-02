@@ -1,0 +1,25 @@
+
+qms: 
+  loadbalance: 
+    TargetService: 
+      backoff: 
+        maxMs: 400
+        minMs: 200
+        kind: constant
+      retryEnabled: false
+      retryOnNext: 2
+      retryOnSame: 3
+      serverListFilters: zoneaware
+      strategy: 
+        name: WeightedResponse
+    backoff: 
+      maxMs: 400
+      minMs: 200
+      kind: constant
+    retryEnabled: false
+    retryOnNext: 2
+    retryOnSame: 3
+    serverListFilters: zoneaware
+    strategy: 
+      name: WeightedResponse
+

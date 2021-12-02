@@ -1,0 +1,26 @@
+SHELL := /bin/bash
+
+.PHONY: all build test clean
+
+build:
+	go build -v ./...
+
+all: build test install
+
+test:
+	go test -v -parallel 1 -p 1 -count=1 ./test/service_manage/circuit_breaker/...
+	go test -v -parallel 1 -p 1 -count=1 ./test/service_manage/consumer_limit/...
+	go test -v -parallel 1 -p 1 -count=1 ./test/service_manage/provider_limit/...
+	go test -v -parallel 1 -p 1 -count=1 ./test/service_manage/loadbancer_retry/...
+	go test -v -parallel 1 -p 1 -count=1 ./test/...
+	go test -v -parallel 1 -p 1 -count=1 ./pkg/...
+	go test -v -parallel 1 -p 1 -count=1 ./protocol/...
+
+install:
+	go install ./cmd/protoc-gen-qms
+	go install ./cmd/qms-gen
+
+clean:
+	rm -f ${GOPATH}/bin/protoc-gen-qms
+	rm -f ${GOPATH}/bin/qms-gen
+

@@ -1,0 +1,125 @@
+image: registry.qtt6.cn/ee/go:1.14.2-2
+
+services:
+  - name: mysql:8.0
+  - name: mongo:4.1
+  - name: consul:1.7.2
+  - name: redis:5.0.3-alpine3.9
+  - name: rabbitmq:3.7.13-alpine
+  - name: martinnowak/kafka:1.0.0
+    alias: kafka
+  - name: nsqio/nsq:v1.1.0
+    alias: nsq
+    command:
+      - /nsqd
+
+variables:
+  #PEDESTAL_CI: "yes"
+  # Configure mysql service (https://hub.docker.com/_/mysql/)
+  MYSQL_USER: root
+  MYSQL_DATABASE: gitlab_testing_qulibs
+  MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+  # Configure kafka
+  ALLOW_PLAINTEXT_LISTENER: "yes"
+
+
+stages:
+  - init
+  - testing
+
+
+goinstall:
+  stage: init
+  tags:
+    - k8s-qa
+
+  script:
+    ##
+    ## go env
+    ##
+    - go env
+
+
+gotesting:
+  stage: testing
+  tags:
+    - k8s-qa
+
+  before_script:
+    ##
+    ## Install ssh-agent if not already installed, it is required by Docker.
+    ## (change apt-get to yum if you use an RPM-based image)
+    ##
+    #- 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+
+    ##
+    ## Create the SSH directory and give it the right permissions.
+    ## Create id_rsa with the SSH key stored in SSH_PRIVATE_KEY variable.
+    ##
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+
+    ##
+    ## ensure known_hosts
+    ##
+    - ssh-keyscan github.com > ~/.ssh/known_hosts
+    - ssh-keyscan git.qutoutiao.net >> ~/.ssh/known_hosts
+
+    ##
+    ## Optionally, if you will be using any Git commands, set the user name and
+    ## and email.
+    ##
+    - git config --global user.name "Git"
+    - git config --global user.email "git@qutoutiao.net"
+    - git config --global url."git@github.com:".insteadOf "https://github.com/"
+    - git config --global url."git@git.qutoutiao.net:".insteadOf "https://git.qutoutiao.net/"
+
+    ##
+    ## export GOPATH
+    ##
+    - mkdir -p $GOPATH/src/git.qutoutiao.net/gopher
+    - ln -s $(pwd) $GOPATH/src/git.qutoutiao.net/gopher/qulibs
+
+    ##
+    ## dependences
+    ## replace go mod with vendor for ci
+    ##
+    - git submodule update --init --recursive
+    - go mod tidy -v
+
+  script:
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/config/file
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/config/file
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/config/meta/testdata/current
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/config/meta/testdata/current
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/config/meta/testdata/current
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/config/meta/testdata/current
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/gorm
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/gorm
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/grpc/registry
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/grpc/registry
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/grpc/resolver
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/grpc/resolver
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/mongo
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/mongo
+    - go test -v -timeout 60s -race git.qutoutiao.net/gopher/qulibs/nsq
+    - go test -cover -timeout 60s git.qutoutiao.net/gopher/qulibs/nsq
+    - go test -v -timeout 60s -race git.qutoutiao.net/gopher/qulibs/kafka
+    - go test -cover -timeout 60s git.qutoutiao.net/gopher/qulibs/kafka
+    - go test -v -timeout 60s -race git.qutoutiao.net/gopher/qulibs/logger
+    - go test -cover -timeout 60s git.qutoutiao.net/gopher/qulibs/logger
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/rabbitmq
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/rabbitmq
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/redis
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/redis
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/session
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/session
+    - go test -v -timeout 30s -race git.qutoutiao.net/gopher/qulibs/trace
+    - go test -cover -timeout 30s git.qutoutiao.net/gopher/qulibs/trace
+
+  after_script:
+    ##
+    ## TODO: ?
+    ##

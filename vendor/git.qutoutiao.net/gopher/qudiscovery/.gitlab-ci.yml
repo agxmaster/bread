@@ -1,0 +1,25 @@
+image: golang:1.13
+
+services:
+  - consul:1.4.3
+
+variables:
+  GO111MODULE: "on"
+  GOPROXY: "https://goproxy.cn,direct"
+
+before_script:
+  - mkdir -p $(dirname "$GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH")
+  - ln -svf $CI_PROJECT_DIR $(dirname "$GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH")
+  - cd $GOPATH/src/git.qutoutiao.net/$CI_PROJECT_PATH
+
+stages:
+    - test
+
+format:
+    stage: test
+    script:
+      - wget -nv -P /usr/local/bin/ https://git.qutoutiao.net/dawxy/ci-download/raw/master/consul
+      - chmod +x /usr/local/bin/consul
+      - go vet ./...
+      - go test ./... -cover -race -gcflags=all=-l -timeout 300s
+      - go test ./... -bench="." -timeout 300s -test.run BenchmarkLoadBalance
